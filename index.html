@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Countdown Timer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #FFFFFF;
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+            transition: background 0.8s ease;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+        }
+
+        body.black-bg {
+            background: #000000;
+        }
+
+        body.green-bg {
+            background: linear-gradient(135deg, #1a5e1a 0%, #2d8b2d 50%, #3eb83e 100%);
+        }
+
+        body.yellow-bg {
+            background: linear-gradient(135deg, #5e5e1a 0%, #8b8b2d 50%, #b8b83e 100%);
+        }
+
+        body.orange-bg {
+            background: linear-gradient(135deg, #5e3a1a 0%, #8b5a2d 50%, #b8783e 100%);
+        }
+
+        body.red-bg {
+            background: linear-gradient(135deg, #5e1a1a 0%, #8b2d2d 50%, #b83e3e 100%);
+        }
+
+        body.flashing-red {
+            background: #FF0000 !important;
+        }
+
+        body.flashing-black {
+            background: #000000 !important;
+        }
+
+        .container {
+            text-align: center;
+            width: 90%;
+            max-width: 1400px;
+            position: relative;
+            padding: 20px;
+        }
+
+        .timer-display {
+            font-size: clamp(120px, 35vw, 450px);
+            font-weight: 700;
+            color: #000000;
+            text-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            margin: 40px 0;
+            letter-spacing: 0.05em;
+            transition: all 0.8s ease;
+            white-space: nowrap;
+            overflow: visible;
+        }
+
+        body.black-bg .timer-display {
+            color: #FFFFFF;
+        }
+
+        body.green-bg .timer-display {
+            color: #00D084;
+        }
+
+        body.yellow-bg .timer-display {
+            color: #FFC107;
+        }
+
+        body.orange-bg .timer-display {
+            color: #FF9800;
+        }
+
+        body.red-bg .timer-display {
+            color: #F44336;
+            animation: urgentPulse 0.5s ease-in-out infinite;
+        }
+
+        body.flashing-red .timer-display,
+        body.flashing-black .timer-display {
+            background: none !important;
+            -webkit-background-clip: initial !important;
+            -webkit-text-fill-color: initial !important;
+            background-clip: initial !important;
+            animation: none !important;
+        }
+
+        body.flashing-red .timer-display {
+            color: #000000 !important;
+        }
+
+        body.flashing-black .timer-display {
+            color: #FF0000 !important;
+        }
+
+        @keyframes urgentPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+
+        .colon {
+            /* Blinking controlled by JavaScript */
+        }
+
+        .colon.blinking {
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 49% { opacity: 1; }
+            50%, 100% { opacity: 0.3; }
+        }
+
+        .icon-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+
+        .icon-btn {
+            width: 80px;
+            height: 80px;
+            min-width: 44px;
+            min-height: 44px;
+            border-radius: 50%;
+            border: none;
+            background: #FFFFFF;
+            backdrop-filter: blur(10px);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body.black-bg .icon-btn {
+            background: #000000;
+            box-shadow: 0 4px 20px rgba(255, 255, 255, 0.3);
+        }
+
+        body.green-bg .icon-btn {
+            background: rgba(26, 94, 26, 0.8);
+        }
+
+        body.yellow-bg .icon-btn {
+            background: rgba(94, 94, 26, 0.8);
+        }
+
+        body.orange-bg .icon-btn {
+            background: rgba(94, 58, 26, 0.8);
+        }
+
+        body.red-bg .icon-btn {
+            background: rgba(94, 26, 26, 0.8);
+        }
+
+        body.flashing-red .icon-btn {
+            background: #FF0000 !important;
+        }
+
+        body.flashing-black .icon-btn {
+            background: #000000 !important;
+        }
+
+        .icon-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.4s, height 0.4s;
+        }
+
+        .icon-btn:hover::before {
+            width: 100%;
+            height: 100%;
+        }
+
+        .icon-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .icon-btn:active {
+            transform: scale(0.95);
+        }
+
+        .icon-btn svg {
+            width: 36px;
+            height: 36px;
+            fill: #000000;
+            position: relative;
+            z-index: 1;
+            transition: fill 0.3s ease;
+        }
+
+        body.black-bg .icon-btn svg {
+            fill: #FFFFFF;
+        }
+
+        body.green-bg .icon-btn svg {
+            fill: #00D084;
+        }
+
+        body.yellow-bg .icon-btn svg {
+            fill: #FFC107;
+        }
+
+        body.orange-bg .icon-btn svg {
+            fill: #FF9800;
+        }
+
+        body.red-bg .icon-btn svg {
+            fill: #F44336;
+        }
+
+        body.flashing-red .icon-btn svg {
+            fill: #000000 !important;
+        }
+
+        body.flashing-black .icon-btn svg {
+            fill: #FF0000 !important;
+        }
+
+        .icon-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .icon-btn:disabled:hover {
+            transform: none;
+        }
+
+        .settings-panel {
+            position: fixed;
+            bottom: -100%;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            padding: 40px 20px;
+            padding-bottom: calc(40px + env(safe-area-inset-bottom));
+            border-top-left-radius: 30px;
+            border-top-right-radius: 30px;
+            box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.5);
+            transition: bottom 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            z-index: 1000;
+            max-height: 90vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        body.black-bg .settings-panel {
+            background: rgba(0, 0, 0, 0.98);
+        }
+
+        body.green-bg .settings-panel {
+            background: rgba(26, 94, 26, 0.98);
+        }
+
+        body.yellow-bg .settings-panel {
+            background: rgba(94, 94, 26, 0.98);
+        }
+
+        body.orange-bg .settings-panel {
+            background: rgba(94, 58, 26, 0.98);
+        }
+
+        body.red-bg .settings-panel {
+            background: rgba(94, 26, 26, 0.98);
+        }
+
+        body.flashing-red .settings-panel {
+            background: rgba(255, 0, 0, 0.98);
+        }
+
+        body.flashing-black .settings-panel {
+            background: rgba(0, 0, 0, 0.98);
+        }
+
+        .settings-panel.show {
+            bottom: 0;
+        }
+
+        .settings-header {
+            color: #000000;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 30px;
+        }
+
+        body.black-bg .settings-header,
+        body.green-bg .settings-header,
+        body.yellow-bg .settings-header,
+        body.orange-bg .settings-header,
+        body.red-bg .settings-header {
+            color: white;
+        }
+
+        body.flashing-red .settings-header {
+            color: #000000;
+        }
+
+        body.flashing-black .settings-header {
+            color: #FF0000;
+        }
+
+        .number-picker-container {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        .number-picker {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .number-picker label {
+            color: #000000;
+            font-size: 16px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        body.black-bg .number-picker label,
+        body.green-bg .number-picker label,
+        body.yellow-bg .number-picker label,
+        body.orange-bg .number-picker label,
+        body.red-bg .number-picker label {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .picker-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .picker-btn {
+            width: 50px;
+            height: 50px;
+            min-width: 44px;
+            min-height: 44px;
+            border-radius: 50%;
+            border: 2px solid #000000;
+            background: rgba(0, 0, 0, 0.1);
+            color: #000000;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body.black-bg .picker-btn,
+        body.green-bg .picker-btn,
+        body.yellow-bg .picker-btn,
+        body.orange-bg .picker-btn,
+        body.red-bg .picker-btn {
+            border-color: rgba(255, 255, 255, 0.6);
+            background: rgba(255, 255, 255, 0.2);
+            color: #FFFFFF;
+        }
+
+        .picker-btn:hover {
+            background: rgba(0, 0, 0, 0.2);
+            transform: scale(1.1);
+        }
+
+        body.black-bg .picker-btn:hover,
+        body.green-bg .picker-btn:hover,
+        body.yellow-bg .picker-btn:hover,
+        body.orange-bg .picker-btn:hover,
+        body.red-bg .picker-btn:hover {
+            background: rgba(255, 255, 255, 0.35);
+        }
+
+        .picker-btn:active {
+            transform: scale(0.95);
+        }
+
+        .picker-value {
+            width: 100px;
+            height: 80px;
+            background: rgba(0, 0, 0, 0.1);
+            border: 2px solid #000000;
+            border-radius: 15px;
+            color: #000000;
+            font-size: 40px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        body.black-bg .picker-value,
+        body.green-bg .picker-value,
+        body.yellow-bg .picker-value,
+        body.orange-bg .picker-value,
+        body.red-bg .picker-value {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.5);
+            color: #FFFFFF;
+        }
+
+        .apply-btn {
+            margin-top: 30px;
+            padding: 15px 50px;
+            min-height: 44px;
+            background: linear-gradient(135deg, #333333, #000000);
+            border: none;
+            border-radius: 50px;
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body.green-bg .apply-btn {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            box-shadow: 0 4px 20px rgba(76, 175, 80, 0.4);
+        }
+
+        body.yellow-bg .apply-btn {
+            background: linear-gradient(135deg, #DAA520, #B8860B);
+            box-shadow: 0 4px 20px rgba(218, 165, 32, 0.4);
+        }
+
+        body.orange-bg .apply-btn {
+            background: linear-gradient(135deg, #FF8C00, #CC7000);
+            box-shadow: 0 4px 20px rgba(255, 140, 0, 0.4);
+        }
+
+        body.red-bg .apply-btn {
+            background: linear-gradient(135deg, #DC143C, #B21130);
+            box-shadow: 0 4px 20px rgba(220, 20, 60, 0.4);
+        }
+
+        .apply-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.6);
+        }
+
+        body.green-bg .apply-btn:hover {
+            box-shadow: 0 6px 25px rgba(76, 175, 80, 0.6);
+        }
+
+        body.yellow-bg .apply-btn:hover {
+            box-shadow: 0 6px 25px rgba(218, 165, 32, 0.6);
+        }
+
+        body.orange-bg .apply-btn:hover {
+            box-shadow: 0 6px 25px rgba(255, 140, 0, 0.6);
+        }
+
+        body.red-bg .apply-btn:hover {
+            box-shadow: 0 6px 25px rgba(220, 20, 60, 0.6);
+        }
+
+        .apply-btn:active {
+            transform: translateY(0);
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+                width: 95%;
+            }
+
+            .timer-display {
+                font-size: clamp(80px, 25vw, 200px);
+                margin: 20px 0;
+            }
+
+            .icon-buttons {
+                gap: 15px;
+                margin-top: 30px;
+            }
+
+            .icon-btn {
+                width: 65px;
+                height: 65px;
+            }
+
+            .icon-btn svg {
+                width: 30px;
+                height: 30px;
+            }
+
+            .settings-panel {
+                padding: 30px 15px;
+                padding-bottom: calc(30px + env(safe-area-inset-bottom));
+            }
+
+            .settings-header {
+                font-size: 20px;
+                margin-bottom: 20px;
+            }
+
+            .number-picker-container {
+                gap: 25px;
+            }
+
+            .picker-value {
+                width: 70px;
+                height: 65px;
+                font-size: 32px;
+            }
+
+            .picker-btn {
+                width: 45px;
+                height: 45px;
+                font-size: 20px;
+            }
+
+            .picker-controls {
+                gap: 10px;
+            }
+
+            .apply-btn {
+                padding: 12px 40px;
+                font-size: 16px;
+                margin-top: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+                width: 98%;
+            }
+
+            .timer-display {
+                font-size: clamp(60px, 22vw, 150px);
+                margin: 15px 0;
+            }
+
+            .icon-buttons {
+                gap: 12px;
+                margin-top: 20px;
+            }
+
+            .icon-btn {
+                width: 55px;
+                height: 55px;
+            }
+
+            .icon-btn svg {
+                width: 26px;
+                height: 26px;
+            }
+
+            .settings-panel {
+                padding: 25px 12px;
+                padding-bottom: calc(25px + env(safe-area-inset-bottom));
+            }
+
+            .settings-header {
+                font-size: 18px;
+            }
+
+            .number-picker-container {
+                gap: 20px;
+                flex-direction: column;
+            }
+
+            .picker-value {
+                width: 65px;
+                height: 60px;
+                font-size: 28px;
+            }
+
+            .picker-btn {
+                width: 42px;
+                height: 42px;
+                font-size: 18px;
+            }
+
+            .number-picker label {
+                font-size: 14px;
+            }
+
+            .apply-btn {
+                padding: 10px 35px;
+                font-size: 15px;
+            }
+        }
+
+        @media (max-width: 375px) {
+            .timer-display {
+                font-size: clamp(50px, 20vw, 120px);
+                margin: 10px 0;
+            }
+
+            .icon-buttons {
+                gap: 10px;
+            }
+
+            .icon-btn {
+                width: 50px;
+                height: 50px;
+            }
+
+            .icon-btn svg {
+                width: 24px;
+                height: 24px;
+            }
+
+            .picker-value {
+                width: 60px;
+                height: 55px;
+                font-size: 24px;
+            }
+
+            .picker-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 16px;
+            }
+
+            .apply-btn {
+                padding: 10px 30px;
+                font-size: 14px;
+            }
+        }
+
+        @media (min-width: 601px) and (max-width: 1024px) {
+            .timer-display {
+                font-size: clamp(100px, 28vw, 350px);
+            }
+
+            .icon-btn {
+                width: 75px;
+                height: 75px;
+            }
+
+            .icon-btn svg {
+                width: 34px;
+                height: 34px;
+            }
+
+            .settings-panel {
+                padding: 35px 18px;
+            }
+
+            .picker-value {
+                width: 85px;
+                height: 75px;
+                font-size: 36px;
+            }
+        }
+
+        @media (min-width: 1025px) and (max-width: 1440px) {
+            .timer-display {
+                font-size: clamp(120px, 32vw, 400px);
+            }
+        }
+
+        @media (min-width: 1441px) {
+            .timer-display {
+                font-size: clamp(140px, 35vw, 450px);
+            }
+
+            .container {
+                max-width: 1600px;
+            }
+        }
+
+        @media (max-height: 600px) and (orientation: landscape) {
+            .timer-display {
+                font-size: clamp(60px, 18vh, 200px);
+                margin: 10px 0;
+            }
+
+            .icon-buttons {
+                margin-top: 15px;
+                gap: 12px;
+            }
+
+            .icon-btn {
+                width: 50px;
+                height: 50px;
+            }
+
+            .icon-btn svg {
+                width: 24px;
+                height: 24px;
+            }
+
+            .settings-panel {
+                max-height: 80vh;
+                overflow-y: auto;
+            }
+        }
+
+        @media (hover: none) and (pointer: coarse) {
+            .icon-btn:hover::before {
+                width: 0;
+                height: 0;
+            }
+
+            .icon-btn:active {
+                transform: scale(0.9);
+            }
+
+            .picker-btn:active {
+                transform: scale(0.9);
+            }
+
+            .apply-btn:active {
+                transform: scale(0.98);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="timer-display" id="timerDisplay">
+            <span id="minutes">05</span><span class="colon">:</span><span id="seconds">00</span>
+        </div>
+
+        <div class="icon-buttons">
+            <button class="icon-btn" id="soundBtn" title="Toggle Sound">
+                <svg id="soundIcon" viewBox="0 0 24 24">
+                    <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                </svg>
+            </button>
+
+            <button class="icon-btn start" id="startBtn" title="Start">
+                <svg viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z"/>
+                </svg>
+            </button>
+
+            <button class="icon-btn stop" id="stopBtn" title="Stop" disabled>
+                <svg viewBox="0 0 24 24">
+                    <path d="M6 6h12v12H6z"/>
+                </svg>
+            </button>
+
+            <button class="icon-btn" id="fullscreenBtn" title="Toggle Fullscreen">
+                <svg id="fullscreenIcon" viewBox="0 0 24 24">
+                    <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+                </svg>
+            </button>
+
+            <button class="icon-btn" id="settingsBtn" title="Settings">
+                <svg viewBox="0 0 24 24">
+                    <circle cx="12" cy="5" r="2"/>
+                    <circle cx="12" cy="12" r="2"/>
+                    <circle cx="12" cy="19" r="2"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <div class="settings-panel" id="settingsPanel">
+        <div class="settings-header">Set Timer</div>
+        <div class="number-picker-container">
+            <div class="number-picker">
+                <label>Minutes</label>
+                <div class="picker-controls">
+                    <button class="picker-btn" id="minusMin">−</button>
+                    <div class="picker-value" id="minutesValue">5</div>
+                    <button class="picker-btn" id="plusMin">+</button>
+                </div>
+            </div>
+            <div class="number-picker">
+                <label>Seconds</label>
+                <div class="picker-controls">
+                    <button class="picker-btn" id="minusSec">−</button>
+                    <div class="picker-value" id="secondsValue">0</div>
+                    <button class="picker-btn" id="plusSec">+</button>
+                </div>
+            </div>
+        </div>
+        <button class="apply-btn" id="applyBtn">Apply</button>
+    </div>
+
+    <script>
+        // Audio file paths configuration
+        const AUDIO_FILES = {
+            countdownVoice: './countdown_voice.mp3',
+            startBuzzer: './start_buzzer.mp3',
+            countdownMusic: './countdown_music.mp3',
+            clockTicking: './clock_ticking.mp3',
+            endBuzzer: './end_buzzer.mp3'
+        };
+
+        // Flashing configuration
+        const FLASH_INTERVAL_MS = 500;
+
+        const timerDisplay = document.getElementById('timerDisplay');
+        const minutesDisplay = document.getElementById('minutes');
+        const secondsDisplay = document.getElementById('seconds');
+        const colonDisplay = document.querySelector('.colon');
+        const soundBtn = document.getElementById('soundBtn');
+        const soundIcon = document.getElementById('soundIcon');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        const fullscreenIcon = document.getElementById('fullscreenIcon');
+        const settingsBtn = document.getElementById('settingsBtn');
+        const settingsPanel = document.getElementById('settingsPanel');
+        const minutesValue = document.getElementById('minutesValue');
+        const secondsValue = document.getElementById('secondsValue');
+        const minusMin = document.getElementById('minusMin');
+        const plusMin = document.getElementById('plusMin');
+        const minusSec = document.getElementById('minusSec');
+        const plusSec = document.getElementById('plusSec');
+        const applyBtn = document.getElementById('applyBtn');
+
+        let totalSeconds = 300;
+        let remainingSeconds = 300;
+        let timerInterval = null;
+        let isRunning = false;
+        let isMuted = false;
+        let pickerMinutes = 5;
+        let pickerSeconds = 0;
+        let flashInterval = null;
+        let isFlashing = false;
+        let flashState = false;
+
+        // Audio elements
+        let countdownVoiceAudio = null;
+        let startBuzzerAudio = null;
+        let countdownMusicAudio = null;
+        let clockTickingAudio = null;
+        let endBuzzerAudio = null;
+
+        function initAudioElements() {
+            countdownVoiceAudio = new Audio(AUDIO_FILES.countdownVoice);
+            startBuzzerAudio = new Audio(AUDIO_FILES.startBuzzer);
+            countdownMusicAudio = new Audio(AUDIO_FILES.countdownMusic);
+            clockTickingAudio = new Audio(AUDIO_FILES.clockTicking);
+            endBuzzerAudio = new Audio(AUDIO_FILES.endBuzzer);
+
+            countdownMusicAudio.loop = true;
+            clockTickingAudio.loop = true;
+        }
+
+        function clearAllColorClasses() {
+            document.body.classList.remove('black-bg', 'green-bg', 'yellow-bg', 'orange-bg', 'red-bg', 'flashing-red', 'flashing-black');
+        }
+
+        function startFlashing() {
+            if (isFlashing) return;
+            
+            isFlashing = true;
+            flashState = false;
+            
+            // Initial state: red background, black text
+            clearAllColorClasses();
+            document.body.classList.add('flashing-red');
+            
+            flashInterval = setInterval(() => {
+                flashState = !flashState;
+                
+                if (flashState) {
+                    // Black background, red text/icons
+                    clearAllColorClasses();
+                    document.body.classList.add('flashing-black');
+                } else {
+                    // Red background, black text/icons
+                    clearAllColorClasses();
+                    document.body.classList.add('flashing-red');
+                }
+            }, FLASH_INTERVAL_MS);
+        }
+
+        function stopFlashing() {
+            if (!isFlashing) return;
+            
+            isFlashing = false;
+            clearInterval(flashInterval);
+            
+            // Reset to white
+            clearAllColorClasses();
+            updateDisplay();
+        }
+
+        function handleUserActivity() {
+            if (isFlashing) {
+                stopFlashing();
+            }
+        }
+
+        // Add event listeners for user activity
+        document.addEventListener('mousemove', handleUserActivity);
+        document.addEventListener('mousedown', handleUserActivity);
+        document.addEventListener('touchstart', handleUserActivity);
+        document.addEventListener('touchmove', handleUserActivity);
+        document.addEventListener('click', handleUserActivity);
+
+        function updateDisplay() {
+            const mins = Math.floor(remainingSeconds / 60);
+            const secs = remainingSeconds % 60;
+            minutesDisplay.textContent = String(mins).padStart(2, '0');
+            secondsDisplay.textContent = String(secs).padStart(2, '0');
+
+            // Don't update colors if flashing
+            if (isFlashing) return;
+
+            // Update colors based on time remaining and timer state
+            if (!isRunning && remainingSeconds === totalSeconds) {
+                // Initial state or after stop - white background
+                return;
+            }
+
+            clearAllColorClasses();
+            
+            if (remainingSeconds >= 60) {
+                document.body.classList.add('green-bg');
+            } else if (remainingSeconds < 60 && remainingSeconds >= 30) {
+                document.body.classList.add('yellow-bg');
+            } else if (remainingSeconds < 30 && remainingSeconds > 10) {
+                document.body.classList.add('orange-bg');
+            } else if (remainingSeconds <= 10 && remainingSeconds > 0) {
+                document.body.classList.add('red-bg');
+            }
+
+            // Switch audio at 10 seconds
+            if (isRunning && remainingSeconds === 10) {
+                if (!isMuted && countdownMusicAudio) {
+                    countdownMusicAudio.pause();
+                    countdownMusicAudio.currentTime = 0;
+                    clockTickingAudio.play().catch(e => console.log('Clock ticking play failed:', e));
+                }
+            }
+        }
+
+        function updatePickerDisplay() {
+            minutesValue.textContent = pickerMinutes;
+            secondsValue.textContent = pickerSeconds;
+        }
+
+        function stopAllAudio() {
+            if (countdownMusicAudio) {
+                countdownMusicAudio.pause();
+                countdownMusicAudio.currentTime = 0;
+            }
+            if (clockTickingAudio) {
+                clockTickingAudio.pause();
+                clockTickingAudio.currentTime = 0;
+            }
+        }
+
+        function startTimer() {
+            // Start colon blinking
+            colonDisplay.classList.add('blinking');
+            
+            // Start countdown music if more than 10 seconds
+            if (!isMuted && remainingSeconds > 10) {
+                countdownMusicAudio.play().catch(e => console.log('Countdown music play failed:', e));
+            } else if (!isMuted && remainingSeconds <= 10) {
+                clockTickingAudio.play().catch(e => console.log('Clock ticking play failed:', e));
+            }
+
+            timerInterval = setInterval(() => {
+                remainingSeconds--;
+                updateDisplay();
+
+                if (remainingSeconds <= 0) {
+                    clearInterval(timerInterval);
+                    isRunning = false;
+                    
+                    // Stop colon blinking
+                    colonDisplay.classList.remove('blinking');
+                    
+                    stopAllAudio();
+                    
+                    if (!isMuted) {
+                        endBuzzerAudio.play().catch(e => console.log('End buzzer play failed:', e));
+                    }
+                    
+                    // Start flashing
+                    startFlashing();
+                    
+                    startBtn.disabled = false;
+                    stopBtn.disabled = true;
+                }
+            }, 1000);
+        }
+
+        soundBtn.addEventListener('click', () => {
+            isMuted = !isMuted;
+            if (isMuted) {
+                soundIcon.innerHTML = '<path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>';
+                stopAllAudio();
+            } else {
+                soundIcon.innerHTML = '<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>';
+            }
+        });
+
+        startBtn.addEventListener('click', async () => {
+            initAudioElements();
+            startBtn.disabled = true;
+            
+            // Stop flashing if it was active
+            if (isFlashing) {
+                stopFlashing();
+            }
+            
+            // Change to black background immediately when start is clicked
+            clearAllColorClasses();
+            document.body.classList.add('black-bg');
+            
+            // Play countdown voice (timer doesn't start yet)
+            if (!isMuted) {
+                try {
+                    await countdownVoiceAudio.play();
+                    await new Promise(resolve => {
+                        countdownVoiceAudio.onended = resolve;
+                    });
+                } catch (e) {
+                    console.log('Countdown voice play failed:', e);
+                }
+
+                // Play start buzzer and transition to green
+                try {
+                    startBuzzerAudio.play().catch(e => console.log('Start buzzer play failed:', e));
+                } catch (e) {
+                    console.log('Start buzzer play failed:', e);
+                }
+            }
+            
+            // Transition to green when start buzzer plays
+            clearAllColorClasses();
+            document.body.classList.add('green-bg');
+            
+            // Now start the timer
+            isRunning = true;
+            stopBtn.disabled = false;
+            startTimer();
+        });
+
+        stopBtn.addEventListener('click', () => {
+            clearInterval(timerInterval);
+            isRunning = false;
+            remainingSeconds = totalSeconds;
+            stopAllAudio();
+            
+            // Stop colon blinking
+            colonDisplay.classList.remove('blinking');
+            
+            // Stop flashing if it was active
+            if (isFlashing) {
+                stopFlashing();
+            }
+            
+            // Reset to white background
+            clearAllColorClasses();
+            
+            updateDisplay();
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+        });
+
+        fullscreenBtn.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(e => {
+                    console.log('Fullscreen failed:', e);
+                });
+                fullscreenIcon.innerHTML = '<path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/>';
+            } else {
+                document.exitFullscreen();
+                fullscreenIcon.innerHTML = '<path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>';
+            }
+        });
+
+        document.addEventListener('fullscreenchange', () => {
+            if (!document.fullscreenElement) {
+                fullscreenIcon.innerHTML = '<path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>';
+            }
+        });
+
+        settingsBtn.addEventListener('click', () => {
+            settingsPanel.classList.toggle('show');
+        });
+
+        minusMin.addEventListener('click', () => {
+            if (pickerMinutes > 0) {
+                pickerMinutes--;
+                updatePickerDisplay();
+            }
+        });
+
+        plusMin.addEventListener('click', () => {
+            if (pickerMinutes < 300) {
+                pickerMinutes++;
+                updatePickerDisplay();
+            }
+        });
+
+        minusSec.addEventListener('click', () => {
+            if (pickerSeconds > 0) {
+                pickerSeconds--;
+                updatePickerDisplay();
+            }
+        });
+
+        plusSec.addEventListener('click', () => {
+            if (pickerSeconds < 59) {
+                pickerSeconds++;
+                updatePickerDisplay();
+            }
+        });
+
+        applyBtn.addEventListener('click', () => {
+            if (pickerMinutes === 0 && pickerSeconds === 0) {
+                alert('Please set a valid time');
+                return;
+            }
+
+            totalSeconds = pickerMinutes * 60 + pickerSeconds;
+            remainingSeconds = totalSeconds;
+            
+            // Stop colon blinking if timer was running
+            colonDisplay.classList.remove('blinking');
+            
+            // Stop flashing if it was active
+            if (isFlashing) {
+                stopFlashing();
+            }
+            
+            // Reset to white background
+            clearAllColorClasses();
+            
+            updateDisplay();
+            settingsPanel.classList.remove('show');
+            
+            if (isRunning) {
+                clearInterval(timerInterval);
+                stopAllAudio();
+                isRunning = false;
+                startBtn.disabled = false;
+                stopBtn.disabled = true;
+            }
+        });
+
+        updateDisplay();
+    </script>
+</body>
+</html>
